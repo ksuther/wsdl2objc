@@ -313,7 +313,6 @@
     xmlFreeDoc(doc);
 
 done:
-    xmlCleanupParser();
     [self completedWithResponse:self.response];
 }
 
