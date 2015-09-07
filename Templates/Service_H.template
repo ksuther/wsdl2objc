@@ -15,6 +15,7 @@
 
 %FOREACH port in ports
 + (%«port.binding.className» *)%«port.binding.cleanName»;
-%ENDFOR
++ (%«port.binding.className» *)%«port.binding.cleanName»WithAddress:(NSString *)address;
 
+%ENDFOR
 @end

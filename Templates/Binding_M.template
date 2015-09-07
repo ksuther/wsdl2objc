@@ -1,3 +1,12 @@
+@interface %«className»Operation ()
+- (void)completedWithError:(NSError *)error;
+
+@property(nonatomic, strong) %«className»Response *response;
+@property(nonatomic, strong) %«className»SuccessBlock success;
+@property(nonatomic, strong) %«className»ErrorBlock error;
+@property(nonatomic) BOOL isFinished;
+@end
+
 @implementation %«className»
 
 + (NSTimeInterval)defaultTimeout {
@@ -35,28 +44,7 @@
     }
 }
 
-- (%«className»Response *)performSynchronousOperation:(%«className»Operation *)operation {
-    [operation start];
-
-    // Now wait for response
-    NSRunLoop *theRL = [NSRunLoop currentRunLoop];
-
-    while (![operation isFinished] && [theRL runMode:NSDefaultRunLoopMode beforeDate:[NSDate distantFuture]]);
-
-    return operation.response;
-}
-
 %FOREACH operation in operations
-- (%«className»Response *)%«operation.invokeString» {
-    %«className»_%«operation.className» *op = [[%«className»_%«operation.className» alloc] initWithBinding:self success:nil error:nil
-%FOREACH part in operation.input.bodyParts
-        %«part.name»:a%«part.uname»
-%ENDFOR
-    ];
-
-    return [self performSynchronousOperation:op];
-}
-
 - (%«className»_%«operation.className»*)%«operation.invokeString» success:(%«className»SuccessBlock)success error:(%«className»ErrorBlock)error {
     %«className»_%«operation.className» *op = [[%«className»_%«operation.className» alloc] initWithBinding:self success:success error:error
 %FOREACH part in operation.input.bodyParts
@@ -68,11 +56,11 @@
 }
 %ENDFOR
 
-- (void)sendHTTPCallUsingBody:(NSString *)outputBody soapAction:(NSString *)soapAction forOperation:(%«className»Operation *)operation {
+- (NSURLRequest *)URLRequestForBody:(NSString *)outputBody soapAction:(NSString *)soapAction forOperation:(%«className»Operation *)operation {
     if (!outputBody) {
         NSError *err = [NSError errorWithDomain:@"%«className»NULLRequestException" code:0 userInfo:nil];
-        [operation connection:nil didFailWithError:err];
-        return;
+        [operation completedWithError:err];
+        return nil;
     }
 
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:self.address 
@@ -80,37 +68,31 @@
                                                        timeoutInterval:self.timeout];
     NSData *bodyData = [outputBody dataUsingEncoding:NSUTF8StringEncoding];
 
-    if (self.cookies)
+    if (self.cookies) {
         [request setAllHTTPHeaderFields:[NSHTTPCookie requestHeaderFieldsWithCookies:self.cookies]];
-    [request setValue:@"wsdl2objc" forHTTPHeaderField:@"User-Agent"];
+    }
+
     [request setValue:soapAction forHTTPHeaderField:@"SOAPAction"];
     [request setValue:[[self MIMEType] stringByAppendingString:@"; charset=utf-8"] forHTTPHeaderField:@"Content-Type"];
     [request setValue:[NSString stringWithFormat:@"%lu", (unsigned long)[bodyData length]] forHTTPHeaderField:@"Content-Length"];
     [request setValue:self.address.host forHTTPHeaderField:@"Host"];
-    for (NSString *eachHeaderField in self.customHeaders)
+
+    for (NSString *eachHeaderField in self.customHeaders) {
         [request setValue:[self.customHeaders objectForKey:eachHeaderField] forHTTPHeaderField:eachHeaderField];
+    }
+
     [request setHTTPMethod:@"POST"];
     // set version 1.1 - how?
-    [request setHTTPBody: bodyData];
+    [request setHTTPBody:bodyData];
 
     if (self.logXMLInOut) {
         NSLog(@"OutputHeaders:\n%@", [request allHTTPHeaderFields]);
         NSLog(@"OutputBody:\n%@", outputBody);
     }
 
-    NSURLConnection *connection = [[NSURLConnection alloc] initWithRequest:request delegate:operation];
-
-    operation.urlConnection = connection;
+    return request;
 }
 
-@end
-
-@interface %«className»Operation ()
-- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error;
-@property(nonatomic, strong) %«className»Response *response;
-@property(nonatomic, strong) %«className»SuccessBlock success;
-@property(nonatomic, strong) %«className»ErrorBlock error;
-@property(nonatomic) BOOL isFinished;
 @end
 
 @implementation %«className»Operation
@@ -125,11 +107,8 @@
 }
 
 - (void)cancel {
-    NSError *cancelError = [NSError errorWithDomain:(__bridge NSString *)kCFErrorDomainCFNetwork code:kCFURLErrorCancelled userInfo:nil];
-
-    [self.urlConnection cancel];
+    [self.URLSessionTask cancel];
     [super cancel];
-    [self connection:self.urlConnection didFailWithError:cancelError];
 }
 
 - (void)completedWithResponse:(%«className»Response *)aResponse {
@@ -144,23 +123,29 @@
     self.isFinished = YES;
 }
 
-- (BOOL)connection:(NSURLConnection *)connection canAuthenticateAgainstProtectionSpace:(NSURLProtectionSpace *)protectionSpace {
-    return [self.binding.sslManager canAuthenticateForAuthenticationMethod:protectionSpace.authenticationMethod];
-}
-
-- (void)connection:(NSURLConnection *)connection didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge {
-    if (![self.binding.sslManager authenticateForChallenge:challenge]) {
-        [[challenge sender] cancelAuthenticationChallenge:challenge];
+- (void)completedWithError:(NSError *)error {
+    if (self.binding.logXMLInOut && (![[error domain] isEqualToString:(__bridge NSString *)kCFErrorDomainCFNetwork] || [error code] != kCFURLErrorCancelled)) {
+        NSLog(@"ResponseError:\n%@", error);
     }
+    self.response.error = error;
+    [self completedWithResponse:self.response];
 }
 
-- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)urlResponse {
-    if (![urlResponse isKindOfClass:[NSHTTPURLResponse class]]) {
-        NSLog(@"Unexpected url response: %@", urlResponse);
+- (void)processResponseNode:(xmlNodePtr)node classes:(NSDictionary *)classes result:(NSMutableArray *)result {
+    if (node->type != XML_ELEMENT_NODE) return;
+    NSString *name = [NSString stringWithXmlString:(xmlChar *)node->name free:NO];
+    id object = [classes[name] deserializeNode:node];
+    if (object)
+        [result addObject:object];
+}
+
+- (void)handleData:(NSData *)data response:(NSURLResponse *)response error:(NSError *)error {
+    if (![response isKindOfClass:[NSHTTPURLResponse class]]) {
+        NSLog(@"Unexpected url response: %@", response);
         return;
     }
 
-    NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)urlResponse;
+    NSHTTPURLResponse *httpResponse = (NSHTTPURLResponse *)response;
 
     if (self.binding.logXMLInOut) {
         NSLog(@"ResponseStatus: %ld\n", (long)[httpResponse statusCode]);
@@ -169,44 +154,34 @@
 
     self.binding.cookies = [[NSHTTPCookie cookiesWithResponseHeaderFields:[httpResponse allHeaderFields] forURL:self.binding.address] mutableCopy];
 
-    if ([urlResponse.MIMEType rangeOfString:[self.binding MIMEType]].length != 0)
-        return;
-
-    NSInteger contentLength = [httpResponse.allHeaderFields[@"Content-Length"] integerValue];
-
-    if (contentLength == 0 && self.binding.ignoreEmptyResponse) {
-        [self completedWithResponse:self.response];
-        return;
-    }
-
-    NSError *error = nil;
-    [connection cancel];
-    if ([httpResponse statusCode] >= 400) {
-        NSDictionary *userInfo =  @{NSURLErrorKey: httpResponse.URL ?: @"",
-                                    NSLocalizedDescriptionKey: [NSHTTPURLResponse localizedStringForStatusCode:[httpResponse statusCode]]};
-        error = [NSError errorWithDomain:@"%«className»ResponseHTTP" code:[httpResponse statusCode] userInfo:userInfo];
+    if ([response.MIMEType rangeOfString:[self.binding MIMEType]].length != 0) {
+        [self didFinishLoadingWithData:data];
     } else {
-        NSDictionary *userInfo =  @{NSURLErrorKey: httpResponse.URL ?: @"",
-                                    NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Unexpected response MIME type to SOAP call:%@", urlResponse.MIMEType]};
-        error = [NSError errorWithDomain:@"%«className»ResponseHTTP" code:1 userInfo:userInfo];
-    }
+        NSInteger contentLength = [httpResponse.allHeaderFields[@"Content-Length"] integerValue];
 
-    [self connection:connection didFailWithError:error];
+        if (contentLength == 0 && self.binding.ignoreEmptyResponse) {
+            [self completedWithResponse:self.response];
+            return;
+        }
+
+        NSError *error = nil;
+
+        if ([httpResponse statusCode] >= 400) {
+            NSDictionary *userInfo =  @{NSURLErrorKey: httpResponse.URL ?: @"",
+                                        NSLocalizedDescriptionKey: [NSHTTPURLResponse localizedStringForStatusCode:[httpResponse statusCode]]};
+            error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@ResponseHTTP", NSStringFromClass([self class])] code:[httpResponse statusCode] userInfo:userInfo];
+        } else {
+            NSDictionary *userInfo =  @{NSURLErrorKey: httpResponse.URL ?: @"",
+                                        NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Unexpected response MIME type to SOAP call:%@", response.MIMEType]};
+            error = [NSError errorWithDomain:[NSString stringWithFormat:@"%@ResponseHTTP", NSStringFromClass([self class])] code:1 userInfo:userInfo];
+        }
+
+        [self completedWithError:error];
+    }
 }
 
-- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
-    if (!self.responseData)
-        self.responseData = [data mutableCopy];
-    else
-        [self.responseData appendData:data];
-}
-
-- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
-    if (self.binding.logXMLInOut && (![[error domain] isEqualToString:(__bridge NSString *)kCFErrorDomainCFNetwork] || [error code] != kCFURLErrorCancelled)) {
-        NSLog(@"ResponseError:\n%@", error);
-    }
-    self.response.error = error;
-    [self completedWithResponse:self.response];
+- (void)didFinishLoadingWithData:(NSData *)data {
+    // Implemented by subclasses
 }
 
 @end
@@ -234,22 +209,33 @@
     NSString *operationXMLString = [%«className»_envelope serializedFormUsingDelegate:self];
     operationXMLString = self.binding.soapSigner ? [self.binding.soapSigner signRequest:operationXMLString] : operationXMLString;
 
-    [self.binding sendHTTPCallUsingBody:operationXMLString
-                             soapAction:@"%«operation.soapAction»"
-                           forOperation:self];
+    NSURLRequest *request = [self.binding URLRequestForBody:operationXMLString soapAction:@"%«operation.soapAction»" forOperation:self];
+    NSURLSessionDataTask *dataTask = [self.binding.URLSession dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+        if (error) {
+            [self completedWithError:error];
+        } else {
+            [self handleData:data response:response error:error];
+        }
+    }];
+
+    self.URLSessionTask = dataTask;
+    
+    [dataTask resume];
 }
 
 - (void)addSoapBody:(xmlNodePtr)root {
 %IFDEF operation.input.headers
     xmlNodePtr headerNode = xmlNewDocNode(root->doc, NULL, (const xmlChar *)"Header", NULL);
-    xmlAddChild(root, headerNode);
 
 %FOREACH header in operation.input.headers
     if (self.binding.%«header.name»Header)
         [%«header.type.className» serializeToChildOf:headerNode withName:"%«header.type.prefix»:%«header.name»" value:self.binding.%«header.name»Header];
 
 %ENDFOR
-    xmlSetNs(headerNode, root->ns);
+    if (xmlChildElementCount(headerNode) > 0) {
+        xmlAddChild(root, headerNode);
+        xmlSetNs(headerNode, root->ns);
+    }
 %ENDIF
 %IFDEF operation.input.bodyParts
     xmlNodePtr bodyNode = xmlNewDocNode(root->doc, NULL, (const xmlChar *)"Body", NULL);
@@ -270,22 +256,12 @@
 %ENDIF
 }
 
-- (void)processResponseNode:(xmlNodePtr)node classes:(NSDictionary *)classes result:(NSMutableArray *)result {
-    if (node->type != XML_ELEMENT_NODE) return;
-    NSString *name = [NSString stringWithXmlString:(xmlChar *)node->name free:NO];
-    id object = [classes[name] deserializeNode:node];
-    if (object)
-        [result addObject:object];
-}
-
-- (void)connectionDidFinishLoading:(NSURLConnection *)connection {
-    if (!self.responseData) return;
-
+- (void)didFinishLoadingWithData:(NSData *)data {
     if (self.binding.logXMLInOut) {
-        NSLog(@"ResponseBody:\n%@", [[NSString alloc] initWithData:self.responseData encoding:NSUTF8StringEncoding]);
+        NSLog(@"ResponseBody:\n%@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
     }
 
-    xmlDocPtr doc = xmlReadMemory([self.responseData bytes], (int)[self.responseData length], NULL, NULL, XML_PARSE_COMPACT | XML_PARSE_NOBLANKS);
+    xmlDocPtr doc = xmlReadMemory([data bytes], (int)[data length], NULL, NULL, XML_PARSE_COMPACT | XML_PARSE_NOBLANKS);
     if (doc == NULL) {
         NSDictionary *userInfo = @{NSLocalizedDescriptionKey: @"Errors while parsing returned XML"};
         self.response.error = [NSError errorWithDomain:@"%«className»ResponseXML" code:1 userInfo:userInfo];

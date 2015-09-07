@@ -15,8 +15,8 @@ typedef void (^%«className»ErrorBlock)(NSError *error);
 @property (nonatomic) NSTimeInterval timeout;
 @property (nonatomic, strong) NSMutableArray *cookies;
 @property (nonatomic, strong) NSMutableDictionary *customHeaders;
-@property (nonatomic, strong) id <SSLCredentialsManaging> sslManager;
 @property (nonatomic, strong) SOAPSigner *soapSigner;
+@property (nonatomic, strong) NSURLSession *URLSession;
 
 %FOREACH header in inputHeaders
 %IF header.type.isEnum
@@ -29,28 +29,20 @@ typedef void (^%«className»ErrorBlock)(NSError *error);
 + (NSTimeInterval) defaultTimeout;
 
 - (id)initWithAddress:(NSString *)anAddress;
-- (void)sendHTTPCallUsingBody:(NSString *)body soapAction:(NSString *)soapAction forOperation:(%«className»Operation *)operation;
 - (void)addCookie:(NSHTTPCookie *)toAdd;
 - (NSString *)MIMEType;
 
 %FOREACH operation in operations
-- (%«className»Response *)%«operation.invokeString»;
 - (%«className»_%«operation.className»*)%«operation.invokeString» success:(%«className»SuccessBlock)success error:(%«className»ErrorBlock)error;
 %ENDFOR
 @end
 
-@interface %«className»Operation : NSOperation <NSURLConnectionDelegate>
+@interface %«className»Operation : NSOperation
 @property(nonatomic, strong) %«className» *binding;
 @property(nonatomic, strong, readonly) %«className»Response *response;
-@property(nonatomic, strong) NSMutableData *responseData;
-@property(nonatomic, strong) NSURLConnection *urlConnection;
+@property(nonatomic, strong) NSURLSessionTask *URLSessionTask;
 
 - (id)initWithBinding:(%«className» *)aBinding success:(%«className»SuccessBlock)success error:(%«className»ErrorBlock)error;
-
-/**
- * Cancels connection. Response has error with code kCFURLErrorCancelled in domain kCFErrorDomainCFNetwork.
- */
-- (void)cancel;
 
 @end
 

@@ -10,6 +10,10 @@
 + (%«port.binding.className» *)%«port.binding.cleanName» {
     return [[%«port.binding.className» alloc] initWithAddress:@"%«port.address»"];
 }
-%ENDFOR
 
++ (%«port.binding.className» *)%«port.binding.cleanName»WithAddress:(NSString *)address {
+    return [[%«port.binding.className» alloc] initWithAddress:address];
+}
+
+%ENDFOR
 @end
