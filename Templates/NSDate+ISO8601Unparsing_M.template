@@ -53,12 +53,12 @@ static BOOL is_leap_year(NSInteger year) {
         october, november, december
     };
 
-    NSCalendar *gregorian = [[NSCalendar alloc] initWithCalendarIdentifier:NSGregorianCalendar];
-    NSDateComponents *dateComps = [gregorian components:NSYearCalendarUnit|NSMonthCalendarUnit|NSDayCalendarUnit|NSWeekdayCalendarUnit fromDate:self];
+    NSCalendar *gregorian = [[NSCalendar alloc] initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
+    NSDateComponents *dateComps = [gregorian components:NSCalendarUnitYear|NSCalendarUnitMonth|NSCalendarUnitDay|NSCalendarUnitWeekday fromDate:self];
     NSInteger year = [dateComps year];
     NSInteger week = 0;
     NSInteger dayOfWeek = ([dateComps weekday] + 6) % 7;
-    NSInteger dayOfYear = (NSInteger)[gregorian ordinalityOfUnit:NSDayCalendarUnit inUnit:NSYearCalendarUnit forDate:self];
+    NSInteger dayOfYear = (NSInteger)[gregorian ordinalityOfUnit:NSCalendarUnitDay inUnit:NSCalendarUnitYear forDate:self];
 
     NSInteger prevYear = year - 1;
 
@@ -99,10 +99,10 @@ static BOOL is_leap_year(NSInteger year) {
 
 - (NSString *)ISO8601OrdinalDateStringWithTime:(BOOL)includeTime timeSeparator:(unichar)timeSep {
     NSCalendar *gregorian = [[NSCalendar alloc]
-                             initWithCalendarIdentifier:NSGregorianCalendar];
-    NSDateComponents *dateComps = [gregorian components: NSYearCalendarUnit fromDate: self];
+                             initWithCalendarIdentifier:NSCalendarIdentifierGregorian];
+    NSDateComponents *dateComps = [gregorian components:NSCalendarUnitYear fromDate: self];
     NSInteger year = [dateComps year];
-    NSUInteger dayOfYear = [gregorian ordinalityOfUnit: NSDayCalendarUnit inUnit:NSYearCalendarUnit forDate:self];
+    NSUInteger dayOfYear = [gregorian ordinalityOfUnit:NSCalendarUnitDay inUnit:NSCalendarUnitYear forDate:self];
     NSString *timeString;
 
     if (includeTime) {
