@@ -19,7 +19,7 @@
 %ELSIF hasSuperAttributes
     [value addAttributesToNode:child];
 %ENDIF
-%IF hasSequenceElements
+%IF hasSequenceElementsOrChoiceSuper
     [value addElementsToNode:child];
 %ELSIF hasSuperElements
     [value addElementsToNode:child];
@@ -37,7 +37,7 @@
 %ENDFOR
 }
 %ENDIF
-%IF hasSequenceElements
+%IF hasSequenceElementsOrChoiceSuper
 
 - (void)addElementsToNode:(xmlNodePtr)node {
 %IF hasSuperElements
@@ -55,6 +55,15 @@
 
 %ENDIF
 %ENDFOR
+%IF choiceSuper
+
+    if (_%«superClass.typeName») {
+        NSString *className = NSStringFromClass([_%«superClass.typeName» class]);
+        NSString *name = [NSString stringWithFormat:@"%«superClass.prefix»:%@", [className substringWithRange:NSMakeRange([@"%«superClass.prefix»" length] + 1, [className length] - ([@"%«superClass.prefix»" length] + 5))]];
+
+        [[_%«superClass.typeName» class] serializeToChildOf:node withName:[name UTF8String] value:_TargetFolderIdType];
+    }
+%ENDIF
 }
 
 %FOREACH element in sequenceElements

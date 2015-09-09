@@ -188,12 +188,16 @@ static NSArray *flattedSubstitutions(NSArray *elements) {
     ret[@"superClassName"] = @"NSObject";
     if (self.superClass) {
         ret[@"superClass"] = self.superClass;
+
         if (self.superClass.asComplex) {
             ret[@"superClassName"] = self.superClass.className;
             ret[@"complexSuper"] = @YES;
-        }
-        else if ([self.superClass isKindOfClass:[USPrimitiveType class]])
+        } else if ([self.superClass isKindOfClass:[USChoiceType class]]) {
+            ret[@"choiceSuper"] = @YES;
+        } else if ([self.superClass isKindOfClass:[USPrimitiveType class]]) {
             ret[@"attributedSimpleType"] = @YES;
+        }
+
         for (USComplexType *parent = self.superClass.asComplex; parent; parent = parent.superClass.asComplex) {
             if ([parent.sequenceElements count] > 0)
                 ret[@"hasSuperElements"] = @YES;
@@ -203,6 +207,7 @@ static NSArray *flattedSubstitutions(NSArray *elements) {
     }
     ret[@"sequenceElements"] = flattedSubstitutions(self.sequenceElements ?: @[]);
     ret[@"hasSequenceElements"] = @([self.sequenceElements count]);
+    ret[@"hasSequenceElementsOrChoiceSuper"] = @([ret[@"hasSequenceElements"] boolValue] || [ret[@"choiceSuper"] boolValue]);
     ret[@"hasArrayElements"] = @NO;
     for (USElement *element in self.sequenceElements) {
         if (element.isArray) {

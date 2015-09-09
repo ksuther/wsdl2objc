@@ -37,4 +37,9 @@
 %ENDIF
 %ENDFOR
 %ENDIF
+%IF choiceSuper
+
+/* choice */
+@property (nonatomic, strong) %«superClass.variableTypeName» %«superClass.typeName»;
+%ENDIF
 @end
