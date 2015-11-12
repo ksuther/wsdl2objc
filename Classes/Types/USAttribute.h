@@ -31,7 +31,7 @@
 @property (nonatomic, strong) NSString *attributeDefault;
 @property (nonatomic, strong) USType *type;
 
-- (NSDictionary *)templateKeyDictionary;
+- (NSDictionary *)templateKeyDictionaryForAllowedTypes:(NSSet<NSString *> *)allowedTypes allowedOperations:(NSSet<NSString *> *)allowedOperations;
 
 + (USAttribute *)attributeWithElement:(NSXMLElement *)el schema:(USSchema *)schema;
 @end

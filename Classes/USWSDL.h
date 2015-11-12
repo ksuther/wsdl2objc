@@ -31,5 +31,5 @@
 
 - (USSchema *)createSchemaForNamespace:(NSString *)xmlNS prefix:(NSString *)prefix;
 - (USSchema *)schemaForPrefix:(NSString *)prefix;
-- (NSDictionary *)templateKeyDictionary;
+- (NSDictionary *)templateKeyDictionaryForAllowedTypes:(NSSet<NSString *> *)allowedTypes allowedOperations:(NSSet<NSString *> *)allowedOperations;
 @end

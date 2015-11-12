@@ -33,6 +33,8 @@
 #import "USSchema.h"
 #import "USService.h"
 #import "USType.h"
+#import "USOperation.h"
+#import "USOperationInterface.h"
 
 @interface USWriter ()
 @property (nonatomic, copy) NSURL *outDir;
@@ -50,13 +52,52 @@
 }
 
 - (void)write {
-    for (NSString *schema in self.wsdl.schemas)
-        [self writeSchema:self.wsdl.schemas[schema]];
+    [self writeOperations:nil];
+}
+
+- (void)writeOperations:(NSArray<NSString *> *)operations {
+    NSMutableSet<NSString *> *allowedTypes = [NSMutableSet set];
+    NSMutableSet<NSString *> *allowedOperations = [NSMutableSet set];
+
+    for (NSString *schemaName in self.wsdl.schemas) {
+        USSchema *schema = self.wsdl.schemas[schemaName];
+
+        if ([operations count] > 0) {
+            // Figure out what types are required by the given operations
+            // Iterate over each operation and figure out the types that it uses
+            for (USService *service in [schema.services allValues]) {
+                for (USPort *port in service.ports) {
+                    NSDictionary *portOperations = [[port binding] operations];
+
+                    for (NSString *nextOperationName in operations) {
+                        USOperation *nextOperation = [portOperations objectForKey:nextOperationName];
+
+                        if (nextOperation) {
+                            [allowedOperations addObject:[nextOperation name]];
+
+                            // Recursively add all types used by this operation to the allowed types
+                            [self addElements:[[[nextOperation input] headers] array] toAllowedTypes:allowedTypes];
+                            [self addElements:[[nextOperation input] bodyParts] toAllowedTypes:allowedTypes];
+
+                            [self addElements:[[[nextOperation output] headers] array] toAllowedTypes:allowedTypes];
+                            [self addElements:[[nextOperation output] bodyParts] toAllowedTypes:allowedTypes];
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    for (NSString *schemaName in self.wsdl.schemas) {
+        USSchema *schema = self.wsdl.schemas[schemaName];
+
+        [self writeSchema:schema allowedTypes:allowedTypes allowedOperations:allowedOperations];
+    }
 
     [self copyStandardFilesToOutputDirectory];
 }
 
-- (void)writeSchema:(USSchema *)schema {
+- (void)writeSchema:(USSchema *)schema allowedTypes:(NSSet<NSString *> *)allowedTypes allowedOperations:(NSSet<NSString *> *)allowedOperations {
     if (schema.hasBeenWritten == YES) return;
     if (![schema shouldWrite]) return;
 
@@ -64,21 +105,24 @@
 
     // Write out any imports first so they can have a prefix generated for them if needed
     for (USSchema *import in schema.imports)
-        [self writeSchema:import];
+        [self writeSchema:import allowedTypes:allowedTypes allowedOperations:allowedOperations];
 
     NSMutableString *hString = [NSMutableString string];
     NSMutableString *mString = [NSMutableString string];
 
-    [self append:schema toHString:hString mString:mString];
+    [self append:schema toHString:hString mString:mString allowedTypes:allowedTypes allowedOperations:allowedOperations];
 
-    for (USType *type in [schema.types allValues])
-        [self appendType:type toHString:hString mString:mString];
+    for (USType *type in [schema.types allValues]) {
+        if ([allowedTypes count] == 0 || [allowedTypes containsObject:[type typeName]]) {
+            [self appendType:type toHString:hString mString:mString];
+        }
+    }
 
     for (USService *service in [schema.services allValues]) {
-        [self append:service toHString:hString mString:mString];
+        [self append:service toHString:hString mString:mString allowedTypes:allowedTypes allowedOperations:allowedOperations];
 
         for (USPort *port in service.ports)
-            [self append:port.binding toHString:hString mString:mString];
+            [self append:port.binding toHString:hString mString:mString allowedTypes:nil allowedOperations:allowedOperations];
     }
 
     if ([hString length] > 0) {
@@ -119,12 +163,12 @@
         }
     }
     
-    [self append:type toHString:hString mString:mString];
+    [self append:type toHString:hString mString:mString allowedTypes:nil allowedOperations:nil];
 }
 
-- (void)append:(id)item toHString:(NSMutableString *)hString mString:(NSMutableString *)mString {
-    NSMutableDictionary *templateKeys = [[item templateKeyDictionary] mutableCopy];
-    templateKeys[@"wsdl"] = [self.wsdl templateKeyDictionary];
+- (void)append:(id)item toHString:(NSMutableString *)hString mString:(NSMutableString *)mString allowedTypes:(NSSet<NSString *> *)allowedTypes allowedOperations:(NSSet<NSString *> *)allowedOperations {
+    NSMutableDictionary *templateKeys = [[item templateKeyDictionaryForAllowedTypes:allowedTypes allowedOperations:allowedOperations] mutableCopy];
+    templateKeys[@"wsdl"] = [self.wsdl templateKeyDictionaryForAllowedTypes:allowedTypes allowedOperations:allowedOperations];
 
     NSArray *errors;
     NSString *newHString = [NSString stringByExpandingTemplateAtPath:[item templateFileHPath]
@@ -147,6 +191,41 @@
     else
         NSLog(@"Errors encountered while generating implementation: %@", errors);
 
+}
+
+- (void)addTypes:(NSArray<USType *> *)types toAllowedTypes:(NSMutableSet<NSString *> *)allowedTypes
+{
+    for (USType *nextType in types) {
+        [self addType:nextType toAllowedTypes:allowedTypes];
+    }
+}
+
+- (void)addType:(USType *)type toAllowedTypes:(NSMutableSet<NSString *> *)allowedTypes
+{
+    [allowedTypes addObject:[type typeName]];
+
+    for (USType *nextType in [type usedTypes]) {
+        if (![allowedTypes containsObject:[nextType typeName]]) {
+            [self addType:nextType toAllowedTypes:allowedTypes];
+        }
+    }
+
+    USType *superType = [[type asComplex] superClass];
+
+    if (superType && ![allowedTypes containsObject:[superType typeName]]) {
+        [self addType:superType toAllowedTypes:allowedTypes];
+    }
+}
+
+- (void)addElements:(NSArray<USElement *> *)elements toAllowedTypes:(NSMutableSet<NSString *> *)allowedTypes
+{
+    for (USElement *nextElement in elements) {
+        [self addType:[nextElement type] toAllowedTypes:allowedTypes];
+
+        for (USElement *nextSubstitionElement in [nextElement substitutions]) {
+            [self addType:[nextSubstitionElement type] toAllowedTypes:allowedTypes];
+        }
+    }
 }
 
 - (void)copyStandardFilesToOutputDirectory {

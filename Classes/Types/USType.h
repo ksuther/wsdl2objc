@@ -50,10 +50,12 @@
 
 - (NSString *)templateFileHPath;
 - (NSString *)templateFileMPath;
-- (NSMutableDictionary *)templateKeyDictionary;
+- (NSMutableDictionary *)templateKeyDictionaryForAllowedTypes:(NSSet<NSString *> *)allowedTypes allowedOperations:(NSSet<NSString *> *)allowedOperations;
 
 - (USComplexType *)asComplex;
 - (instancetype)deriveWithName:(NSString *)newTypeName prefix:(NSString *)newTypePrefix;
+
+- (NSArray<USType *> *)usedTypes;
 @end
 
 @interface USComplexType : USType

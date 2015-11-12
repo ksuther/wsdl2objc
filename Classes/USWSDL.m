@@ -100,7 +100,7 @@
     return self.schemaPrefixes[prefix];
 }
 
-- (NSDictionary *)templateKeyDictionary {
+- (NSDictionary *)templateKeyDictionaryForAllowedTypes:(NSSet<NSString *> *)allowedTypes allowedOperations:(NSSet<NSString *> *)allowedOperations {
     return @{@"schemas": [self.schemas allValues]};
 }
 

@@ -169,7 +169,7 @@
         self.statusString = @"Generating Objective-C code into the output directory...";
 
         USWriter *writer = [[USWriter alloc] initWithWSDL:wsdl outputDirectory:self.outURL];
-        [writer write];
+        [writer writeOperations:nil];
 
         self.statusString = @"Finished!";
 

@@ -31,7 +31,7 @@
 
 - (NSString *)templateFileHPath;
 - (NSString *)templateFileMPath;
-- (NSDictionary *)templateKeyDictionary;
+- (NSDictionary *)templateKeyDictionaryForAllowedTypes:(NSSet<NSString *> *)allowedTypes allowedOperations:(NSSet<NSString *> *)allowedOperations;
 
 + (instancetype)serviceWithElement:(NSXMLElement *)el schema:(USSchema *)schema;
 @end

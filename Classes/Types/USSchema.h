@@ -78,5 +78,5 @@
 
 - (NSString *)templateFileHPath;
 - (NSString *)templateFileMPath;
-- (NSDictionary *)templateKeyDictionary;
+- (NSDictionary *)templateKeyDictionaryForAllowedTypes:(NSSet<NSString *> *)allowedTypes allowedOperations:(NSSet<NSString *> *)allowedOperations;
 @end

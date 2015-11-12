@@ -229,8 +229,18 @@ otherwiseEnqueueIn:(NSMutableDictionary *)waits
     return [[NSBundle mainBundle] pathForTemplateNamed:@"Schema_M"];
 }
 
-- (NSDictionary *)templateKeyDictionary {
-    NSArray *types = [self.types allValues];
+- (NSDictionary *)templateKeyDictionaryForAllowedTypes:(NSSet<NSString *> *)allowedTypes allowedOperations:(NSSet<NSString *> *)allowedOperations {
+    NSArray *types;
+
+    if ([allowedTypes count] > 0) {
+        types = [[self.types dictionaryWithValuesForKeys:[allowedTypes allObjects]] allValues];
+        types = [types filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(id _Nonnull evaluatedObject, NSDictionary<NSString *, id> * _Nullable bindings) {
+            return evaluatedObject != [NSNull null];
+        }]];
+    } else {
+        types = [self.types allValues];
+    }
+
     return @{@"fullName": self.fullName,
              @"prefix": self.prefix,
              @"imports": self.imports,

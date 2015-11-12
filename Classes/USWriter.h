@@ -26,4 +26,5 @@
 @interface USWriter : NSObject
 - (id)initWithWSDL:(USWSDL *)aWsdl outputDirectory:(NSURL *)anOutDir;
 - (void)write;
+- (void)writeOperations:(NSArray<NSString *> *)operations;
 @end

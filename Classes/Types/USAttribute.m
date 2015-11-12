@@ -62,7 +62,7 @@
     return attribute;
 }
 
-- (NSDictionary *)templateKeyDictionary {
+- (NSDictionary *)templateKeyDictionaryForAllowedTypes:(NSSet<NSString *> *)allowedTypes allowedOperations:(NSSet<NSString *> *)allowedOperations {
     return @{@"name": self.name,
              @"typeName": self.type.typeName,
              @"default": self.attributeDefault};

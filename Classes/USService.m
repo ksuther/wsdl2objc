@@ -57,7 +57,7 @@
 	return [[NSBundle mainBundle] pathForTemplateNamed:@"Service_M"];
 }
 
-- (NSDictionary *)templateKeyDictionary {
+- (NSDictionary *)templateKeyDictionaryForAllowedTypes:(NSSet<NSString *> *)allowedTypes allowedOperations:(NSSet<NSString *> *)allowedOperations {
     return @{@"name": self.name,
              @"className": self.className,
              @"ports": self.ports};

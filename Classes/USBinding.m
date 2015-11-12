@@ -80,9 +80,11 @@
 	return [[NSBundle mainBundle] pathForTemplateNamed:@"Binding_M"];
 }
 
-- (NSDictionary *)templateKeyDictionary {
+- (NSDictionary *)templateKeyDictionaryForAllowedTypes:(NSSet<NSString *> *)allowedTypes allowedOperations:(NSSet<NSString *> *)allowedOperations {
     NSMutableDictionary *inputHeaders = [NSMutableDictionary new];
-    for (NSString *key in self.operations) {
+    NSDictionary *matchedOperations = [allowedOperations count] > 0 ? [self.operations dictionaryWithValuesForKeys:[allowedOperations allObjects]] : self.operations;
+
+    for (NSString *key in matchedOperations) {
         for (USElement *header in [self.operations[key] input].headers) {
             if (inputHeaders[header.name]) {
                 assert([(USElement *)inputHeaders[header.name] type] == header.type);
@@ -94,7 +96,7 @@
     return @{@"name": self.name,
              @"className": self.className,
              @"soapVersion": self.soapVersion,
-             @"operations": [[self.operations allValues] sortedArrayUsingKey:@"name" ascending:YES],
+             @"operations": [[matchedOperations allValues] sortedArrayUsingKey:@"name" ascending:YES],
              @"inputHeaders": [inputHeaders allValues]};
 }
 

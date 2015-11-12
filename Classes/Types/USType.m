@@ -88,8 +88,8 @@ static NSArray *flattedSubstitutions(NSArray *elements) {
     return @YES;
 }
 
-- (NSMutableDictionary *)templateKeyDictionary {
-    NSMutableDictionary *ret = [super templateKeyDictionary];
+- (NSMutableDictionary *)templateKeyDictionaryForAllowedTypes:(NSSet<NSString *> *)allowedTypes allowedOperations:(NSSet<NSString *> *)allowedOperations {
+    NSMutableDictionary *ret = [super templateKeyDictionaryForAllowedTypes:allowedTypes allowedOperations:allowedOperations];
     ret[@"enumerationValues"] = self.enumValues;
 
     NSMutableArray *mangledEnumerationValues = [NSMutableArray arrayWithCapacity:self.enumValues.count];
@@ -124,8 +124,8 @@ static NSArray *flattedSubstitutions(NSArray *elements) {
     return @"NSArray *";
 }
 
-- (NSMutableDictionary *)templateKeyDictionary {
-    NSMutableDictionary *ret = [super templateKeyDictionary];
+- (NSMutableDictionary *)templateKeyDictionaryForAllowedTypes:(NSSet<NSString *> *)allowedTypes allowedOperations:(NSSet<NSString *> *)allowedOperations {
+    NSMutableDictionary *ret = [super templateKeyDictionaryForAllowedTypes:allowedTypes allowedOperations:allowedOperations];
     NSArray *choices = flattedSubstitutions(self.choices);
     ret[@"choices"] = choices;
     if (choices.count == 1)
@@ -135,6 +135,20 @@ static NSArray *flattedSubstitutions(NSArray *elements) {
 
 - (instancetype)deriveWithName:(NSString *)newTypeName prefix:(NSString *)newTypePrefix {
     return [USArrayType arrayTypeWithName:newTypeName prefix:newTypePrefix choices:self.choices];
+}
+
+- (NSArray<USType *> *)usedTypes {
+    NSMutableArray<USType *> *usedTypes = [NSMutableArray array];
+
+    for (USElement *nextElement in [self choices]) {
+        [usedTypes addObject:[nextElement type]];
+
+        for (USElement *nextSubstitionElement in [nextElement substitutions]) {
+            [usedTypes addObject:[nextSubstitionElement type]];
+        }
+    }
+
+    return usedTypes;
 }
 @end
 
@@ -155,14 +169,28 @@ static NSArray *flattedSubstitutions(NSArray *elements) {
     return @"id"; // ARC doesn't support unions of Obj-C types :(
 }
 
-- (NSMutableDictionary *)templateKeyDictionary {
-    NSMutableDictionary *ret = [super templateKeyDictionary];
+- (NSMutableDictionary *)templateKeyDictionaryForAllowedTypes:(NSSet<NSString *> *)allowedTypes allowedOperations:(NSSet<NSString *> *)allowedOperations {
+    NSMutableDictionary *ret = [super templateKeyDictionaryForAllowedTypes:allowedTypes allowedOperations:allowedOperations];
     ret[@"choices"] = flattedSubstitutions(self.choices);
     return ret;
 }
 
 - (instancetype)deriveWithName:(NSString *)newTypeName prefix:(NSString *)newTypePrefix {
     return [USChoiceType choiceTypeWithName:newTypeName prefix:newTypePrefix choices:self.choices];
+}
+
+- (NSArray<USType *> *)usedTypes {
+    NSMutableArray<USType *> *usedTypes = [NSMutableArray array];
+
+    for (USElement *nextElement in [self choices]) {
+        [usedTypes addObject:[nextElement type]];
+
+        for (USElement *nextSubstitionElement in [nextElement substitutions]) {
+            [usedTypes addObject:[nextSubstitionElement type]];
+        }
+    }
+
+    return usedTypes;
 }
 @end
 
@@ -183,8 +211,8 @@ static NSArray *flattedSubstitutions(NSArray *elements) {
     return self;
 }
 
-- (NSMutableDictionary *)templateKeyDictionary {
-    NSMutableDictionary *ret = [super templateKeyDictionary];
+- (NSMutableDictionary *)templateKeyDictionaryForAllowedTypes:(NSSet<NSString *> *)allowedTypes allowedOperations:(NSSet<NSString *> *)allowedOperations {
+    NSMutableDictionary *ret = [super templateKeyDictionaryForAllowedTypes:allowedTypes allowedOperations:allowedOperations];
     ret[@"superClassName"] = @"NSObject";
     if (self.superClass) {
         ret[@"superClass"] = self.superClass;
@@ -227,6 +255,22 @@ static NSArray *flattedSubstitutions(NSArray *elements) {
 - (instancetype)deriveWithName:(NSString *)newTypeName prefix:(NSString *)newTypePrefix {
     return [USComplexType complexTypeWithName:newTypeName prefix:newTypePrefix
                                      elements:@[] attributes:@[] base:self];
+}
+
+- (NSArray<USType *> *)usedTypes {
+    NSMutableArray<USType *> *usedTypes = [NSMutableArray array];
+
+    for (USElement *nextElement in [self sequenceElements]) {
+        [usedTypes addObject:[nextElement type]];
+
+        for (USElement *nextSubstitionElement in [nextElement substitutions]) {
+            [usedTypes addObject:[nextSubstitionElement type]];
+        }
+    }
+
+    [usedTypes addObjectsFromArray:[[self attributes] valueForKey:@"type"]];
+
+    return usedTypes;
 }
 @end
 
@@ -305,7 +349,7 @@ static NSArray *flattedSubstitutions(NSArray *elements) {
     return @NO;
 }
 
-- (NSMutableDictionary *)templateKeyDictionary {
+- (NSMutableDictionary *)templateKeyDictionaryForAllowedTypes:(NSSet<NSString *> *)allowedTypes allowedOperations:(NSSet<NSString *> *)allowedOperations {
 	NSMutableDictionary *ret = [NSMutableDictionary dictionary];
 	ret[@"className"] = self.className;
 	ret[@"typeName"] = self.typeName;
@@ -318,6 +362,10 @@ static NSArray *flattedSubstitutions(NSArray *elements) {
 }
 
 - (instancetype)deriveWithName:(NSString *)newTypeName prefix:(NSString *)newTypePrefix {
+    return nil;
+}
+
+- (NSArray<USType *> *)usedTypes {
     return nil;
 }
 @end
