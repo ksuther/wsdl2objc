@@ -101,7 +101,7 @@
     panel.allowsMultipleSelection = NO;
     panel.allowedFileTypes = @[@"wsdl"];
 
-	if ([panel runModal] == NSOKButton) {
+	if ([panel runModal] == NSModalResponseOK) {
 		NSURL *chosenPath = [[panel URLs] lastObject];
 		NSUserDefaultsController *defaults = [NSUserDefaultsController sharedUserDefaultsController];
 		[defaults setValue:[chosenPath absoluteString]
@@ -117,7 +117,7 @@
     panel.resolvesAliases = YES;
     panel.allowsMultipleSelection = NO;
 
-	if ([panel runModal] == NSOKButton) {
+	if ([panel runModal] == NSModalResponseOK) {
 		NSURL *chosenPath = [[panel URLs] lastObject];
 		NSUserDefaultsController *defaults = [NSUserDefaultsController sharedUserDefaultsController];
 		[defaults setValue:[chosenPath absoluteString]
