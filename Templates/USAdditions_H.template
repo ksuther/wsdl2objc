@@ -50,14 +50,14 @@
 - (void)addToNode:(xmlNodePtr)node elementName:(NSString *)name elementNSPrefix:(NSString *)nsPrefix;
 @end
 
-@interface SOAPFault : NSObject
+@interface USSOAPFault : NSObject
 @property(nonatomic, strong) NSString *faultcode;
 @property(nonatomic, strong) NSString *faultstring;
 @property(nonatomic, strong) NSString *faultactor;
 @property(nonatomic, strong) NSString *detail;
 @property(nonatomic, readonly) NSString *simpleFaultString;
 
-+ (SOAPFault *)deserializeNode:(xmlNodePtr)cur expectedExceptions:(NSDictionary *)exceptions;
++ (USSOAPFault *)deserializeNode:(xmlNodePtr)cur expectedExceptions:(NSDictionary *)exceptions;
 @end
 
 @protocol SOAPSignerDelegate

@@ -227,7 +227,7 @@ static const char encodingTable[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq
 }
 @end
 
-@implementation SOAPFault
+@implementation USSOAPFault
 + (id)deserializeFaultDetails:(xmlNodePtr)cur expectedExceptions:(NSDictionary *)exceptions {
     if (cur->children) {
         cur = cur->children;
@@ -248,8 +248,8 @@ static const char encodingTable[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq
     return [NSString deserializeNode:cur];
 }
 
-+ (SOAPFault *)deserializeNode:(xmlNodePtr)cur expectedExceptions:(NSDictionary *)exceptions {
-    SOAPFault *soapFault = [SOAPFault new];
++ (USSOAPFault *)deserializeNode:(xmlNodePtr)cur expectedExceptions:(NSDictionary *)exceptions {
+    USSOAPFault *soapFault = [USSOAPFault new];
     NSString *ns = [NSString stringWithXmlString:(xmlChar *)cur->ns->href free:NO];
     if (!ns) return soapFault;
     if ([ns isEqualToString:@"http://schemas.xmlsoap.org/soap/envelope/"]) {
@@ -263,7 +263,7 @@ static const char encodingTable[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq
                 else if (xmlStrEqual(cur->name, (const xmlChar *) "faultactor"))
                     soapFault.faultactor = [NSString deserializeNode:cur];
                 else if (xmlStrEqual(cur->name, (const xmlChar *) "detail"))
-                    soapFault.detail = [SOAPFault deserializeFaultDetails:cur expectedExceptions:exceptions];
+                    soapFault.detail = [USSOAPFault deserializeFaultDetails:cur expectedExceptions:exceptions];
             }
         }
     }
@@ -288,7 +288,7 @@ static const char encodingTable[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq
                 else if (xmlStrEqual(cur->name, (const xmlChar *)"Node"))
                     soapFault.faultactor = [NSString deserializeNode:cur];
                 else if (xmlStrEqual(cur->name, (const xmlChar *) "Detail"))
-                    soapFault.detail = [SOAPFault deserializeFaultDetails:cur expectedExceptions:exceptions];
+                    soapFault.detail = [USSOAPFault deserializeFaultDetails:cur expectedExceptions:exceptions];
                 // TODO: Add "Role" ivar
             }
         }

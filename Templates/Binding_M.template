@@ -299,7 +299,7 @@
                 if (cur->type != XML_ELEMENT_NODE) continue;
                 if ((bodyNode->ns && xmlStrEqual(bodyNode->ns->prefix, cur->ns->prefix)) &&
                     xmlStrEqual(bodyNode->name, (const xmlChar *)"Fault")) {
-                    SOAPFault *bodyObject = [SOAPFault deserializeNode:bodyNode expectedExceptions:@{}];
+                    USSOAPFault *bodyObject = [USSOAPFault deserializeNode:bodyNode expectedExceptions:@{}];
                     if (bodyObject) [responseBodyParts addObject:bodyObject];
                 }
             }
