@@ -164,8 +164,6 @@
             return;
         }
 
-        NSError *error = nil;
-
         if ([httpResponse statusCode] >= 400) {
             NSDictionary *userInfo =  @{NSURLErrorKey: httpResponse.URL ?: @"",
                                         NSLocalizedDescriptionKey: [NSHTTPURLResponse localizedStringForStatusCode:[httpResponse statusCode]]};

@@ -17,7 +17,7 @@
 #import <Security/Security.h>
 #endif
 
-static Class classForElement(xmlNodePtr cur) {
+static __attribute__((unused)) Class classForElement(xmlNodePtr cur) {
     NSString *instanceType = [NSString stringWithXmlString:xmlGetNsProp(cur, (const xmlChar *)"type", (const xmlChar *)"http://www.w3.org/2001/XMLSchema-instance")
                                                      free:YES];
     if (!instanceType) return nil;
