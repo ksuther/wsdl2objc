@@ -139,7 +139,15 @@
         [result addObject:object];
 }
 
-- (void)handleData:(NSData *)data response:(NSURLResponse *)response error:(NSError *)error {
+- (void)handleData:(NSData *)data response:(NSURLResponse *)response error:(NSError *)error request:(NSURLRequest *)request {
+    if (self.binding.operationCompletionBlock) {
+        self.binding.operationCompletionBlock(NSStringFromClass([self class]), request, data, response, error);
+    }
+
+    if (error) {
+        [self completedWithError:error];
+    }
+
     if (![response isKindOfClass:[NSHTTPURLResponse class]]) {
         NSLog(@"Unexpected url response: %@", response);
         return;
@@ -209,11 +217,7 @@
 
     NSURLRequest *request = [self.binding URLRequestForBody:operationXMLString soapAction:@"%«operation.soapAction»" forOperation:self];
     NSURLSessionDataTask *dataTask = [self.binding.URLSession dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-        if (error) {
-            [self completedWithError:error];
-        } else {
-            [self handleData:data response:response error:error];
-        }
+        [self handleData:data response:response error:error request:request];
     }];
 
     self.URLSessionTask = dataTask;
