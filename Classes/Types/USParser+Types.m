@@ -25,6 +25,7 @@
 #import "NSString+USAdditions.h"
 #import "NSXMLElement+Children.h"
 #import "USAttribute.h"
+#import "USGroup.h"
 #import "USElement.h"
 #import "USSchema.h"
 #import "USType.h"
@@ -206,6 +207,12 @@ static int readMax(NSXMLElement *el) {
                 sequenceElements = subElements;
             else
                 [sequenceElements addObjectsFromArray:subElements];
+        }
+        else if ([localName isEqualToString:@"group"]) {
+            // Expand the group into its member elements
+            [schema withGroupFromElement:child attrName:@"ref" call:^(USGroup *group) {
+                [sequenceElements addObjectsFromArray:[group sequenceElements]];
+            }];
         }
         else if ([localName isEqualToString:@"element"]) {
             [sequenceElements addObject:[self processSequenceElementElement:child schema:schema]];

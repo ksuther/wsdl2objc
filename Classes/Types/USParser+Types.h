@@ -30,4 +30,5 @@
 - (USType *)parseTypeElement:(NSXMLElement *)el schema:(USSchema *)schema name:(NSString *)name;
 - (USType *)parseSimpleType:(NSXMLElement *)el schema:(USSchema *)schema name:(NSString *)name;
 - (USType *)parseComplexType:(NSXMLElement *)el schema:(USSchema *)schema name:(NSString *)name;
+- (NSMutableArray *)parseSequenceBody:(NSXMLElement *)el schema:(USSchema *)schema;
 @end

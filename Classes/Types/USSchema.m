@@ -25,6 +25,7 @@
 #import "NSArray+USAdditions.h"
 #import "NSBundle+USAdditions.h"
 #import "USAttribute.h"
+#import "USGroup.h"
 #import "USBinding.h"
 #import "USElement.h"
 #import "USMessage.h"
@@ -37,6 +38,7 @@
 @interface USSchema ()
 @property (nonatomic, strong) NSMutableDictionary *attributeWaits;
 @property (nonatomic, strong) NSMutableDictionary *attributeGroupWaits;
+@property (nonatomic, strong) NSMutableDictionary *groupWaits;
 @property (nonatomic, strong) NSMutableDictionary *elementWaits;
 @property (nonatomic, strong) NSMutableDictionary *typeWaits;
 @property (nonatomic, strong) NSMutableDictionary *messageWaits;
@@ -52,6 +54,7 @@
         self.elements = [NSMutableDictionary new];
         self.attributes = [NSMutableDictionary new];
         self.attributeGroups = [NSMutableDictionary new];
+        self.groups = [NSMutableDictionary new];
         self.imports = [NSMutableArray new];
         self.messages = [NSMutableDictionary new];
         self.portTypes = [NSMutableDictionary new];
@@ -161,6 +164,22 @@ otherwiseEnqueueIn:(NSMutableDictionary *)waits
 - (void)registerAttributeGroup:(NSArray *)group named:(NSString *)name {
     self.attributeGroups[name] = group;
     [self checkWaits:self.attributeGroupWaits key:name value:group];
+}
+
+- (BOOL)withGroupFromElement:(NSXMLElement *)el attrName:(NSString *)attrName call:(void (^)(USGroup *group))block
+{
+    NSXMLNode *node = [el attributeForName:attrName];
+    USSchema *targetSchema = [self schemaFromNode:node element:el];
+    return [targetSchema call:block
+              withValueForKey:node
+                      ifKeyIn:targetSchema.groups
+           otherwiseEnqueueIn:targetSchema.groupWaits];
+}
+
+- (void)registerGroup:(USGroup *)group
+{
+    self.groups[group.name] = group;
+    [self checkWaits:self.groupWaits key:group.name value:group];
 }
 
 - (BOOL)withMessageFromElement:(NSXMLElement *)el attrName:(NSString *)attrName call:(void (^)(USMessage *))block {

@@ -27,6 +27,7 @@
 @class USType;
 @class USElement;
 @class USAttribute;
+@class USGroup;
 @class USMessage;
 @class USPortType;
 @class USBinding;
@@ -39,6 +40,7 @@
 @property (nonatomic, strong) NSMutableDictionary *elements;
 @property (nonatomic, strong) NSMutableDictionary *attributes;
 @property (nonatomic, strong) NSMutableDictionary *attributeGroups;
+@property (nonatomic, strong) NSMutableDictionary *groups;
 @property (nonatomic, strong) NSMutableArray *imports;
 @property (nonatomic, strong) NSMutableDictionary *messages;
 @property (nonatomic, strong) NSMutableDictionary *portTypes;
@@ -60,6 +62,9 @@
 
 - (BOOL)withAttributeGroupFromElement:(NSXMLElement *)el attrName:(NSString *)attrName call:(void (^)(NSArray *group))block;
 - (void)registerAttributeGroup:(NSArray *)group named:(NSString *)name;
+
+- (BOOL)withGroupFromElement:(NSXMLElement *)el attrName:(NSString *)attrName call:(void (^)(USGroup *group))block;
+- (void)registerGroup:(USGroup *)group;
 
 - (BOOL)withMessageFromElement:(NSXMLElement *)el attrName:(NSString *)attrName call:(void (^)(USMessage *))block;
 - (void)registerMessage:(USMessage *)attribute;

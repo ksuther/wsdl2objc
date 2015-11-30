@@ -25,6 +25,7 @@
 
 #import "NSXMLElement+Children.h"
 #import "USAttribute.h"
+#import "USGroup.h"
 #import "USBinding.h"
 #import "USElement.h"
 #import "USMessage.h"
@@ -246,6 +247,17 @@
         for (NSXMLElement *child in [el childElementsWithName:@"attribute"])
             [group addObject:[USAttribute attributeWithElement:child schema:schema]];
         [schema registerAttributeGroup:group named:[[el attributeForName:@"name"] stringValue]];
+    }
+    else if ([localName isEqualToString:@"group"]) {
+        USGroup *group = [USGroup groupWithElement:el schema:schema];
+
+        // Parse the elements in the group and register them with the group
+        // They'll get expanded in parseSequenceBody:schema:
+        NSArray *sequenceElements = [self parseSequenceBody:[[el childElementsWithName:@"sequence"] firstObject] schema:schema];
+
+        [group setSequenceElements:[sequenceElements copy]];
+
+        [schema registerGroup:group];
     }
 }
 

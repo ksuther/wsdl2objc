@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		376AE3721C0CFAFB001528B9 /* USGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 376AE3711C0CFAFB001528B9 /* USGroup.m */; };
+		376AE3731C0CFB01001528B9 /* USGroup.m in Sources */ = {isa = PBXBuildFile; fileRef = 376AE3711C0CFAFB001528B9 /* USGroup.m */; };
 		3F1F0FFC183134CE0061E2AB /* NSArray+USAdditions.m in Sources */ = {isa = PBXBuildFile; fileRef = 3F1F0FFB183134CE0061E2AB /* NSArray+USAdditions.m */; };
 		3F3620251831D3C000EB446D /* ChoiceType_H.template in Resources */ = {isa = PBXBuildFile; fileRef = 3F3620231831D3C000EB446D /* ChoiceType_H.template */; };
 		3F3620261831D3C000EB446D /* ChoiceType_M.template in Resources */ = {isa = PBXBuildFile; fileRef = 3F3620241831D3C000EB446D /* ChoiceType_M.template */; };
@@ -91,6 +93,8 @@
 		08FB7796FE84155DC02AAC07 /* WSDLParser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = WSDLParser.m; sourceTree = "<group>"; };
 		08FB779EFE84155DC02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
 		32A70AAB03705E1F00C91783 /* WSDLParser_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = WSDLParser_Prefix.pch; sourceTree = "<group>"; };
+		376AE3701C0CFAFB001528B9 /* USGroup.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = USGroup.h; sourceTree = "<group>"; };
+		376AE3711C0CFAFB001528B9 /* USGroup.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = USGroup.m; sourceTree = "<group>"; };
 		3F1F0FFA183134CE0061E2AB /* NSArray+USAdditions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+USAdditions.h"; sourceTree = "<group>"; };
 		3F1F0FFB183134CE0061E2AB /* NSArray+USAdditions.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+USAdditions.m"; sourceTree = "<group>"; };
 		3F3620231831D3C000EB446D /* ChoiceType_H.template */ = {isa = PBXFileReference; explicitFileType = text; fileEncoding = 4; path = ChoiceType_H.template; sourceTree = "<group>"; usesTabs = 0; };
@@ -359,6 +363,8 @@
 				62ADD3980E6890140052979D /* USParser+Types.m */,
 				B97798C60DF45829000F758E /* USType.h */,
 				62BFB31D0E64D15900E19E18 /* USType.m */,
+				376AE3701C0CFAFB001528B9 /* USGroup.h */,
+				376AE3711C0CFAFB001528B9 /* USGroup.m */,
 			);
 			path = Types;
 			sourceTree = "<group>";
@@ -538,6 +544,7 @@
 				624063710E7082C9006BEB94 /* USOperation.m in Sources */,
 				624063770E708572006BEB94 /* USOperationInterface.m in Sources */,
 				62ADD39A0E6890140052979D /* USParser+Types.m in Sources */,
+				376AE3721C0CFAFB001528B9 /* USGroup.m in Sources */,
 				6235EE9F0E638B7B00DABBD6 /* USParser.m in Sources */,
 				6235EEA00E638B7B00DABBD6 /* USParserApplication.m in Sources */,
 				624064900E709FAC006BEB94 /* USPort.m in Sources */,
@@ -566,6 +573,7 @@
 				F4FAC2B91227E4F6006B61BC /* STSTemplateEngineErrors.m in Sources */,
 				F4FAC29E1227E4C5006B61BC /* USAttribute.m in Sources */,
 				F4FAC29F1227E4C7006B61BC /* USBinding.m in Sources */,
+				376AE3731C0CFB01001528B9 /* USGroup.m in Sources */,
 				F4FAC2A01227E4C8006B61BC /* USElement.m in Sources */,
 				F4FAC2A11227E4C9006B61BC /* USMessage.m in Sources */,
 				F4FAC29C1227E4BF006B61BC /* USObjCKeywords.m in Sources */,
