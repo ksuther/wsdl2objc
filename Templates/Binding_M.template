@@ -112,9 +112,19 @@
 }
 
 - (void)completedWithResponse:(%«className»Response *)aResponse {
-    if (aResponse.error) {
+    NSError *error;
+
+    if (self.binding.errorCreationBlock) {
+        error = self.binding.errorCreationBlock(aResponse);
+    }
+
+    if (!error) {
+        error = aResponse.error;
+    }
+
+    if (error) {
         if (self.error)
-            self.error(aResponse.error);
+            self.error(error);
     }
     else if (self.success)
         self.success(aResponse.headers, aResponse.bodyParts);

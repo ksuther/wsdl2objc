@@ -18,6 +18,7 @@ typedef void (^%«className»ErrorBlock)(NSError *error);
 @property (nonatomic, strong) SOAPSigner *soapSigner;
 @property (nonatomic, strong) NSURLSession *URLSession;
 @property (nonatomic, copy) void (^operationCompletionBlock)(NSString *operationName, NSURLRequest *request, NSData *data, NSURLResponse *response, NSError *error);
+@property (nonatomic, copy) NSError * (^errorCreationBlock)(%«className»Response *response);
 
 %FOREACH header in inputHeaders
 %IF header.type.isEnum
