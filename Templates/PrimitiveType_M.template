@@ -106,6 +106,10 @@
     if (value)
 %IFEQ variableTypeName NSData *
         xmlNewChild(node, NULL, (const xmlChar *)childName, [[value base64Encoding] xmlString]);
+%ELSIFEQ className xsd_date
+        xmlNewChild(node, NULL, (const xmlChar *)childName, [[value ISO8601DateStringWithTime:NO] xmlString]);
+%ELSIFEQ className xsd_dateTime
+        xmlNewChild(node, NULL, (const xmlChar *)childName, [[value ISO8601DateStringWithTime:YES] xmlString]);
 %ELSE
         xmlNewChild(node, NULL, (const xmlChar *)childName, [[value description] xmlString]);
 %ENDIF
