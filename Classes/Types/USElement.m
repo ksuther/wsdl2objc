@@ -34,6 +34,7 @@
     USElement *element = [USElement new];
     element.wsdlName = [[el attributeForName:@"name"] stringValue];
     element.name = [USObjCKeywords mangleName:element.wsdlName];
+    element.hasLocalName = element.wsdlName.length > 0;
 
     NSXMLNode *maxOccursNode = [el attributeForName:@"maxOccurs"];
     if (maxOccursNode) {

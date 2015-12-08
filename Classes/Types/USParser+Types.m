@@ -228,6 +228,7 @@ static int readMax(NSXMLElement *el) {
     BOOL isRef = [schema withElementFromElement:el attrName:@"ref" call:^(USElement *element) {
         seqElement.wsdlName = element.wsdlName;
         seqElement.name = element.name;
+        seqElement.hasLocalName = [[[el attributeForName:@"name"] stringValue] length] > 0;
         seqElement.type = element.type;
         seqElement.substitutions = element.substitutions;
     }];
@@ -235,6 +236,7 @@ static int readMax(NSXMLElement *el) {
 
     seqElement.wsdlName = [[el attributeForName:@"name"] stringValue];
     seqElement.name = [seqElement.wsdlName stringByRemovingIllegalCharacters];
+    seqElement.hasLocalName = seqElement.wsdlName.length > 0;
 
     USProxyType *proxy = [USProxyType alloc];
     BOOL hasTypeRef = [schema withTypeFromElement:el attrName:@"type" call:^(USType *t) {

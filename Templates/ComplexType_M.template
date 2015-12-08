@@ -47,11 +47,19 @@
 %FOREACH element in sequenceElements
 %IF element.isArray
     for (%«element.type.variableTypeName» item in _%«element.name»)
+%IF element.hasLocalName
         [%«element.type.className» serializeToChildOf:node withName:"%«prefix»:%«element.wsdlName»" value:item];
+%ELSE
+        [%«element.type.className» serializeToChildOf:node withName:"%«element.type.prefix»:%«element.wsdlName»" value:item];
+%ENDIF
 
 %ELSE
     if (_%«element.name»)
+%IF element.hasLocalName
         [%«element.type.className» serializeToChildOf:node withName:"%«prefix»:%«element.wsdlName»" value:_%«element.name»];
+%ELSE
+        [%«element.type.className» serializeToChildOf:node withName:"%«element.type.prefix»:%«element.wsdlName»" value:_%«element.name»];
+%ENDIF
 
 %ENDIF
 %ENDFOR
