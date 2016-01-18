@@ -114,7 +114,7 @@
 - (void)completedWithResponse:(%«className»Response *)aResponse {
     NSError *error;
 
-    if (self.binding.errorCreationBlock) {
+    if (self.binding.errorCreationBlock && !self.ignoreErrorCreationBlock) {
         error = self.binding.errorCreationBlock(aResponse);
     }
 

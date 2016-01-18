@@ -43,6 +43,7 @@ typedef void (^%«className»ErrorBlock)(NSError *error);
 @property(nonatomic, strong) %«className» *binding;
 @property(nonatomic, strong, readonly) %«className»Response *response;
 @property(nonatomic, strong) NSURLSessionTask *URLSessionTask;
+@property(nonatomic, assign) BOOL ignoreErrorCreationBlock;
 
 - (id)initWithBinding:(%«className» *)aBinding success:(%«className»SuccessBlock)success error:(%«className»ErrorBlock)error;
 
