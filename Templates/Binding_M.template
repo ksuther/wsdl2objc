@@ -240,8 +240,10 @@
     xmlNodePtr headerNode = xmlNewDocNode(root->doc, NULL, (const xmlChar *)"Header", NULL);
 
 %FOREACH header in operation.input.headers
-    if (self.binding.%«header.name»Header)
-        [%«header.type.className» serializeToChildOf:headerNode withName:"%«header.type.prefix»:%«header.name»" value:self.binding.%«header.name»Header];
+    %«header.type.variableTypeName» %«header.name»Header = self.%«header.name»Header ?: self.binding.%«header.name»Header;
+
+    if (%«header.name»Header)
+        [%«header.type.className» serializeToChildOf:headerNode withName:"%«header.type.prefix»:%«header.name»" value:%«header.name»Header];
 
 %ENDFOR
     if (xmlChildElementCount(headerNode) > 0) {

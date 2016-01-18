@@ -57,6 +57,14 @@ typedef void (^%«className»ErrorBlock)(NSError *error);
 %ELSE
 @property(nonatomic, strong) %«part.type.variableTypeName» %«part.name»;
 %ENDIF
+
+%FOREACH header in inputHeaders
+%IF header.type.isEnum
+@property(nonatomic) %«header.type.variableTypeName» %«header.name»Header;
+%ELSE
+@property(nonatomic, strong) %«header.type.variableTypeName» %«header.name»Header;
+%ENDIF
+%ENDFOR
 %ENDFOR
 
 - (id)initWithBinding:(%«className» *)aBinding success:(%«className»SuccessBlock)success error:(%«className»ErrorBlock)error
