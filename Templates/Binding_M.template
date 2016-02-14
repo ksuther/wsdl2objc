@@ -154,6 +154,10 @@
         self.binding.operationCompletionBlock(NSStringFromClass([self class]), request, data, response, error);
     }
 
+    if (self.binding.willParseResponseBlock) {
+        data = self.binding.willParseResponseBlock(data);
+    }
+
     if (error) {
         [self completedWithError:error];
     }

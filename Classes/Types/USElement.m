@@ -72,4 +72,8 @@
     if (!_substitutions) _substitutions = [NSMutableArray new];
     return _substitutions;
 }
+
+- (BOOL) hasSubstitutions {
+    return [_substitutions count] > 0;
+}
 @end

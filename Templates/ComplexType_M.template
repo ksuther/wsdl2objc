@@ -46,12 +46,29 @@
 %ENDIF
 %FOREACH element in sequenceElements
 %IF element.isArray
-    for (%«element.type.variableTypeName» item in _%«element.name»)
+    for (%«element.type.variableTypeName» item in _%«element.name») {
 %IF element.hasLocalName
+%IF element.hasSubstitutions
+%FOREACH substitution in element.substitutions
+        if ([item isKindOfClass:[%«substitution.type.className» class]]) {
+            [%«substitution.type.className» serializeToChildOf:node withName:"%«prefix»:%«element.wsdlName»" value:item];
+        }
+%ENDFOR
+%ELSE
         [%«element.type.className» serializeToChildOf:node withName:"%«prefix»:%«element.wsdlName»" value:item];
+%ENDIF
+%ELSE
+%IF element.hasSubstitutions
+%FOREACH substitution in element.substitutions
+        if ([item isKindOfClass:[%«substitution.type.className» class]]) {
+            [%«substitution.type.className» serializeToChildOf:node withName:"%«prefix»:%«substitution.wsdlName»" value:item];
+        }
+%ENDFOR
 %ELSE
         [%«element.type.className» serializeToChildOf:node withName:"%«element.type.prefix»:%«element.wsdlName»" value:item];
 %ENDIF
+%ENDIF
+    }
 
 %ELSE
     if (_%«element.name»)

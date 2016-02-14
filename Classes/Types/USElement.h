@@ -34,5 +34,6 @@
 @property (nonatomic, strong) NSMutableArray *substitutions;
 
 - (NSString *)uname;
+- (BOOL)hasSubstitutions;
 + (USElement *)elementWithElement:(NSXMLElement *)el schema:(USSchema *)schema;
 @end
