@@ -8,7 +8,11 @@
             Class elementClass = classForElement(child) ?: [%«element.type.className» class];
 %IF element.isArray
             if (!ret) ret = [NSMutableArray new];
-            [ret addObject:[elementClass deserializeNode:child]];
+            id node = [elementClass deserializeNode:child];
+
+            if (node) {
+                [ret addObject:node];
+            }
 %ELSE
             return [elementClass deserializeNode:child];
 %ENDIF

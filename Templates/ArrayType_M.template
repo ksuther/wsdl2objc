@@ -6,7 +6,11 @@
 %FOREACH element in choices
         else if (xmlStrEqual(child->name, (const xmlChar *)"%«element.wsdlName»")) {
             Class elementClass = classForElement(child) ?: [%«element.type.className» class];
-            [ret addObject:[elementClass deserializeNode:child]];
+            id node = [elementClass deserializeNode:child];
+
+            if (node) {
+                [ret addObject:node];
+            }
         }
 %ENDFOR
     }
