@@ -83,5 +83,6 @@ typedef void (^%«className»ErrorBlock)(NSError *error);
 @interface %«className»Response : NSObject
 @property(nonatomic, strong) NSArray *headers;
 @property(nonatomic, strong) NSArray *bodyParts;
+@property(nonatomic, strong) NSData *bodyData;
 @property(nonatomic, strong) NSError *error;
 @end

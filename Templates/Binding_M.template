@@ -175,6 +175,7 @@
     }
 
     self.binding.cookies = [[NSHTTPCookie cookiesWithResponseHeaderFields:[httpResponse allHeaderFields] forURL:self.binding.address] mutableCopy];
+    self.response.bodyData = data;
 
     if ([response.MIMEType rangeOfString:[self.binding MIMEType]].length != 0) {
         [self didFinishLoadingWithData:data];
