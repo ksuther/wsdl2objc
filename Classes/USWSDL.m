@@ -56,7 +56,7 @@
 	[xsd addSimpleClassWithName:@"dateTime" representationClass:@"NSDate *"];
 	[xsd addSimpleClassWithName:@"date" representationClass:@"NSDate *"];
 	[xsd addSimpleClassWithName:@"time" representationClass:@"NSDate *"];
-	[xsd addSimpleClassWithName:@"duration" representationClass:@"NSDate *"];
+	[xsd addSimpleClassWithName:@"duration" representationClass:@"NSString *"];
 	[xsd addSimpleClassWithName:@"base64Binary" representationClass:@"NSData *"];
 	[xsd addSimpleClassWithName:@"decimal" representationClass:@"NSDecimalNumber *"];
 	[xsd addSimpleClassWithName:@"QName" representationClass:@"NSString *"];
