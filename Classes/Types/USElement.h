@@ -25,11 +25,12 @@
 @class USType;
 @class USSchema;
 
-@interface USElement : NSObject
+@interface USElement : NSObject <NSCopying>
 @property (nonatomic, strong) NSString *name;
 @property (nonatomic, strong) NSString *wsdlName;
 @property (nonatomic, strong) USType *type;
 @property (nonatomic) BOOL isArray;
+@property (nonatomic) BOOL isSubstitutionOfArray;
 @property (nonatomic) BOOL hasLocalName;
 @property (nonatomic, strong) NSMutableArray *substitutions;
 

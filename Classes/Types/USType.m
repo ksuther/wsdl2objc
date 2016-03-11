@@ -32,8 +32,13 @@ static NSArray *flattedSubstitutions(NSArray *elements) {
     NSMutableArray *ret = [NSMutableArray arrayWithCapacity:elements.count];
     for (USElement *element in elements) {
         [ret addObject:element];
-        for (USElement *substitution in element.substitutions)
-            [ret addObject:substitution];
+        for (USElement *substitution in element.substitutions) {
+            USElement *copiedSubstitution = [substitution copy];
+
+            copiedSubstitution.isSubstitutionOfArray = element.isArray;
+
+            [ret addObject:copiedSubstitution];
+        }
     }
     return ret;
 }

@@ -64,6 +64,20 @@
     return element;
 }
 
+- (instancetype)copyWithZone:(NSZone *)zone {
+    typeof(self) copy = [[[self class] alloc] init];
+
+    copy->_name = _name;
+    copy->_wsdlName = _wsdlName;
+    copy->_type = _type;
+    copy->_isArray = _isArray;
+    copy->_isSubstitutionOfArray = _isSubstitutionOfArray;
+    copy->_hasLocalName = _hasLocalName;
+    copy->_substitutions = [_substitutions copy];
+
+    return copy;
+}
+
 - (NSString *)uname {
 	return [self.name stringWithCapitalizedFirstCharacter];
 }

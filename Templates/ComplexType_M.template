@@ -165,11 +165,21 @@
         if (cur->type != XML_ELEMENT_NODE) continue;
 
 %FOREACH element in sequenceElements
+%IFNOT element.isSubstitutionOfArray
         else if (xmlStrEqual(cur->name, (const xmlChar *)"%«element.wsdlName»")) {
 %IF element.isArray
             Class elementClass = classForElement(cur) ?: [%«element.type.className» class];
             if (!%«element.name»Values) %«element.name»Values = [NSMutableArray new];
             [%«element.name»Values addObject:[elementClass deserializeNode:cur]];
+%IF element.hasSubstitutions
+%FOREACH substitution in element.substitutions
+        }
+        else if (xmlStrEqual(cur->name, (const xmlChar *)"%«substitution.wsdlName»")) {
+            Class elementClass = classForElement(cur) ?: [%«substitution.type.className» class];
+            if (!%«element.name»Values) %«element.name»Values = [NSMutableArray new];
+            [%«element.name»Values addObject:[elementClass deserializeNode:cur]];
+%ENDFOR
+%ENDIF
 %ELSE
 %IF element.type.isEnum
             self.%«element.name» = [%«element.type.className» deserializeNodeRaw:cur];
@@ -179,6 +189,7 @@
 %ENDIF
 %ENDIF
         }
+%ENDIF
 %ENDFOR
     }
 %IF hasArrayElements
