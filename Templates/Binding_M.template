@@ -17,6 +17,7 @@
     if ((self = [super init])) {
         _customHeaders = [NSMutableDictionary new];
         _timeout = [[self class] defaultTimeout];
+        _saveCookiesAutomatically = YES;
     }
 
     return self;
@@ -39,8 +40,11 @@
 
 - (void)addCookie:(NSHTTPCookie *)toAdd {
     if (toAdd) {
-        if (!self.cookies) self.cookies = [NSMutableArray new];
-        [self.cookies addObject:toAdd];
+        if (self.cookies) {
+            self.cookies = @[toAdd];
+        } else {
+            self.cookies = [self.cookies arrayByAddingObject:toAdd];
+        }
     }
 }
 
@@ -174,7 +178,10 @@
         NSLog(@"ResponseHeaders:\n%@", [httpResponse allHeaderFields]);
     }
 
-    self.binding.cookies = [[NSHTTPCookie cookiesWithResponseHeaderFields:[httpResponse allHeaderFields] forURL:self.binding.address] mutableCopy];
+    if (self.binding.saveCookiesAutomatically) {
+        self.binding.cookies = [NSHTTPCookie cookiesWithResponseHeaderFields:[httpResponse allHeaderFields] forURL:self.binding.address];
+    }
+
     self.response.bodyData = data;
 
     if ([response.MIMEType rangeOfString:[self.binding MIMEType]].length != 0) {
