@@ -506,6 +506,32 @@ static BOOL is_leap_year(NSInteger year) {
                     timeZone = [NSTimeZone timeZoneForSecondsFromGMT:(tz_hour * 3600) + (tz_minute * 60)];
                 }
         }
+    } else if (*ch == '+' || *ch == '-') {
+        BOOL negative = *ch == '-';
+        if (isdigit(*++ch)) {
+            //Read hour offset.
+            tz_hour = *ch - '0';
+            if (isdigit(*++ch)) {
+                tz_hour *= 10U;
+                tz_hour += *(ch++) - '0';
+            }
+            if (negative) tz_hour = -tz_hour;
+
+            //Optional separator.
+            if (*ch == timeSep) ++ch;
+
+            if (isdigit(*ch)) {
+                //Read minute offset.
+                tz_minute = *ch - '0';
+                if (isdigit(*++ch)) {
+                    tz_minute *= 10U;
+                    tz_minute += *ch - '0';
+                }
+                if (negative) tz_minute = -tz_minute;
+            }
+
+            timeZone = [NSTimeZone timeZoneForSecondsFromGMT:(tz_hour * 3600) + (tz_minute * 60)];
+        }
     }
 
     if (timeZone)
