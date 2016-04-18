@@ -7,6 +7,7 @@
  */
 
 #import <Foundation/Foundation.h>
+#import <objc/runtime.h>
 
 #ifndef DEFAULT_TIME_SEPARATOR
 #	define DEFAULT_TIME_SEPARATOR ':'
@@ -30,11 +31,14 @@ static BOOL is_leap_year(NSInteger year) {
     NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
     [formatter setLocale:[NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"]];
     [formatter setDateFormat:dateFormat];
-    [formatter setTimeZone:[NSTimeZone timeZoneWithName:@"UTC"]];
+
+    NSTimeZone *timeZone = objc_getAssociatedObject(self, "timeZone");
+    [formatter setTimeZone:timeZone ?: [NSTimeZone timeZoneWithName:@"UTC"]];
 
     NSString *str = [formatter stringForObjectValue:self];
-    if (includeTime) // NSDate - all values are UTC
-        return [str stringByAppendingString: @"Z"];
+    if (includeTime && !timeZone) // NSDate - all values are UTC
+        str = [str stringByAppendingString: @"Z"];
+
     return str;
 }
 
