@@ -374,7 +374,7 @@
         NSLog(@"ResponseBody:\n%@", [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding]);
     }
 
-    xmlDocPtr doc = xmlReadMemory([data bytes], (int)[data length], NULL, NULL, XML_PARSE_COMPACT | XML_PARSE_NOBLANKS);
+    xmlDocPtr doc = xmlReadMemory([data bytes], (int)[data length], NULL, NULL, XML_PARSE_COMPACT | XML_PARSE_NOBLANKS | XML_PARSE_HUGE);
     if (doc == NULL) {
         NSDictionary *userInfo = @{NSLocalizedDescriptionKey: @"Errors while parsing returned XML"};
         self.response.error = [NSError errorWithDomain:@"%«className»ResponseXML" code:1 userInfo:userInfo];

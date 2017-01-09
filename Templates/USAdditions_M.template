@@ -449,7 +449,7 @@ static xmlXPathObjectPtr execute_xpath_expression(xmlDocPtr doc, const xmlChar* 
                                   (int)[reqData length],
                                   NULL,
                                   NULL,
-                                  XML_PARSE_COMPACT | XML_PARSE_NOBLANKS);
+                                  XML_PARSE_COMPACT | XML_PARSE_NOBLANKS | XML_PARSE_HUGE);
 
     // find the SOAP Header
     xmlXPathObjectPtr xpathObj = execute_xpath_expression(doc,
