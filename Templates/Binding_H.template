@@ -21,7 +21,7 @@ typedef void (^%«className»ErrorBlock)(NSError *error);
 @property (nonatomic, assign) BOOL useNSURLConnection;
 @property (nonatomic, copy) void (^authorizationChallengeBlock)(NSURLRequest *request, NSURLAuthenticationChallenge *challenge); // used only if useNSURLConnection is YES
 @property (nonatomic, copy) void (^operationCompletionBlock)(NSString *operationName, NSURLRequest *request, NSData *data, NSURLResponse *response, NSError *error);
-@property (nonatomic, copy) NSData * (^willParseResponseBlock)(NSData *data);
+@property (nonatomic, copy) NSData * (^willParseResponseBlock)(NSString *operationName, NSData *data);
 @property (nonatomic, copy) NSError * (^errorCreationBlock)(%«className»Response *response);
 
 %FOREACH header in inputHeaders

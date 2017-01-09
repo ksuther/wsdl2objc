@@ -168,7 +168,7 @@
     }
 
     if (self.binding.willParseResponseBlock) {
-        data = self.binding.willParseResponseBlock(data);
+        data = self.binding.willParseResponseBlock(NSStringFromClass([self class]), data);
     }
 
     if (error) {
