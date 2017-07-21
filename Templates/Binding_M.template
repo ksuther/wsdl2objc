@@ -462,7 +462,7 @@ done:
 
     xmlChar *buf;
     int size;
-    xmlDocDumpFormatMemory(doc, &buf, &size, 1);
+    xmlDocDumpFormatMemoryEnc(doc, &buf, &size, "UTF-8", 1);
 
     NSString *serializedForm = [NSString stringWithXmlString:buf free:YES];
 
