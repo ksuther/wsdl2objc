@@ -321,8 +321,10 @@
     NSURLRequest *request = [self.binding URLRequestForBody:operationXMLString soapAction:@"%«operation.soapAction»" forOperation:self];
 
     if (self.binding.useNSURLConnection) {
-        self.responseData = [NSMutableData data];
-        self.URLConnection = [NSURLConnection connectionWithRequest:request delegate:self];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            self.responseData = [NSMutableData data];
+            self.URLConnection = [NSURLConnection connectionWithRequest:request delegate:self];
+        });
     } else {
         NSURLSessionDataTask *dataTask = [self.binding.URLSession dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
             [self handleData:data response:response error:error request:request];
