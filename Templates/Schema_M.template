@@ -5,6 +5,7 @@
 #import "xsd.h"
 
 #import <libxml/xmlstring.h>
+#import <libxml/globals.h>
 #if TARGET_OS_IPHONE
 #import <CFNetwork/CFNetwork.h>
 #endif
