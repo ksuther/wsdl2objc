@@ -244,8 +244,15 @@ static const char encodingTable[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq
         cur = cur->parent;
     }
 
-    // the old NSString fallback
-    return [NSString deserializeNode:cur];
+	xmlBufferPtr buffer = xmlBufferCreate();
+
+	xmlNodeDump(buffer, cur->doc, cur, 0, 1);
+
+	NSString *xmlDetails = @((const char *)buffer->content);
+
+	xmlBufferFree(buffer);
+
+	return xmlDetails;
 }
 
 + (USSOAPFault *)deserializeNode:(xmlNodePtr)cur expectedExceptions:(NSDictionary *)exceptions {
